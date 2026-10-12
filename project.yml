@@ -1,0 +1,39 @@
+name: Koe
+options:
+  bundleIdPrefix: com.atsuya
+  deploymentTarget:
+    iOS: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""   # Xcodeで自分のApple IDのTeamを選ぶ
+targets:
+  Koe:
+    type: application
+    platform: iOS
+    sources: [Koe, Shared]
+    dependencies:
+      - target: KoeControl
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.atsuya.koe
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: 声で日記を記録するためにマイクを使います
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: 録音した声を端末内で文字に起こすために使います
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        TARGETED_DEVICE_FAMILY: "1"
+  KoeControl:
+    type: app-extension
+    platform: iOS
+    sources: [KoeControl, Shared]
+    info:
+      path: KoeControl/Info.plist
+      properties:
+        CFBundleDisplayName: Koe
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.atsuya.koe.control
+        TARGETED_DEVICE_FAMILY: "1"
