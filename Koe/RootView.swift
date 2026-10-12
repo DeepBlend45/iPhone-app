@@ -9,11 +9,11 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $router.selectedTab) {
-            Tab("履歴", systemImage: "list.bullet", value: KoeTab.history) {
-                HistoryView(showRecord: $showRecord)
-            }
             Tab("カレンダー", systemImage: "calendar", value: KoeTab.calendar) {
                 CalendarView(showRecord: $showRecord)
+            }
+            Tab("履歴", systemImage: "list.bullet", value: KoeTab.history) {
+                HistoryView(showRecord: $showRecord)
             }
         }
         .sheet(isPresented: $showRecord) { RecordView() }

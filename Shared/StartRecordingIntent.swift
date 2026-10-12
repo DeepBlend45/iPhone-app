@@ -10,7 +10,7 @@ enum KoeTab: Hashable {
 final class AppRouter {
     static let shared = AppRouter()
     var showRecord = false
-    var selectedTab: KoeTab = .history
+    var selectedTab: KoeTab = .calendar   // 起動時はカレンダーを開く
 }
 
 /// ロック画面・ウィジェットのボタンから呼ばれる。アプリを開いて記録画面を出す
