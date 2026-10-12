@@ -21,11 +21,6 @@ final class AppRouter {
     /// カレンダーの日付マスの範囲（画面全体の座標）。ここから始めたスワイプは月の移動になる
     var gridFrame: CGRect = .zero
 
-    // 詳細画面を開いている間は、タブのスワイプを止める
-    var calendarPushed = false
-    var historyPushed = false
-    var detailOpen: Bool { selectedTab == .calendar ? calendarPushed : historyPushed }
-
     func shiftMonth(_ delta: Int) {
         withAnimation {
             month = Calendar.current.date(byAdding: .month, value: delta, to: month)!

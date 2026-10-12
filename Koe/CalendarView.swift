@@ -6,10 +6,14 @@ struct CalendarView: View {
     @Binding var showRecord: Bool
     @Query(sort: \JournalEntry.createdAt) private var entries: [JournalEntry]
     @State private var selectedDay: Date?
+    @State private var pageWidth: CGFloat = 400
+    @State private var dragMode: DragMode = .undecided
     private let router = AppRouter.shared
     private let cal = Calendar.current
 
     private var month: Date { router.month }
+
+    private enum DragMode { case undecided, month, tab, ignore }
 
     private var entriesByDay: [Date: [JournalEntry]] {
         Dictionary(grouping: entries) { cal.startOfDay(for: $0.createdAt) }
@@ -50,6 +54,8 @@ struct CalendarView: View {
                 }
                 .padding()
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { pageWidth = $0 }
+            .simultaneousGesture(swipeGesture)
             .themedBackground()
             .navigationTitle("カレンダー")
             .navigationBarTitleDisplayMode(.inline)
@@ -57,8 +63,40 @@ struct CalendarView: View {
                 Button("記録", systemImage: "plus") { showRecord = true }
             }
             .navigationDestination(item: $selectedDay) { DayDetailView(day: $0) }
-            .onChange(of: selectedDay) { router.calendarPushed = selectedDay != nil }
         }
+    }
+
+    /// 日付マスから始めた横スワイプは、月が指についてくる。それ以外の左スワイプは、履歴タブへ
+    private var swipeGesture: some Gesture {
+        DragGesture(minimumDistance: 8, coordinateSpace: .global)
+            .onChanged { value in
+                let dx = value.translation.width, dy = value.translation.height
+                if dragMode == .undecided {
+                    guard abs(dx) > 8 || abs(dy) > 8 else { return }
+                    if abs(dx) < abs(dy) * 1.2 {
+                        dragMode = .ignore                       // 縦スクロール
+                    } else if router.gridFrame.contains(value.startLocation) {
+                        dragMode = .month
+                    } else {
+                        dragMode = .tab
+                    }
+                }
+                if dragMode == .month {
+                    router.monthDrag = max(-pageWidth, min(pageWidth, dx))
+                }
+            }
+            .onEnded { value in
+                defer { dragMode = .undecided }
+                let dx = value.translation.width
+                switch dragMode {
+                case .month:
+                    router.finishMonthDrag(dx: dx, predicted: value.predictedEndTranslation.width, width: pageWidth)
+                case .tab where dx < -60:
+                    router.selectedTab = .history
+                default:
+                    break
+                }
+            }
     }
 
     private var grid: some View {
