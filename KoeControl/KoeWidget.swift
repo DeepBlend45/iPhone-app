@@ -80,23 +80,23 @@ struct KoeWidgetView: View {
     @ViewBuilder
     private var buttons: some View {
         Button(intent: StartRecordingIntent()) {
-            actionLabel("mic.fill", "記録", filled: true)
+            actionLabel("mic.fill", "記録")
         }
         .buttonStyle(.plain)
         Button(intent: OpenCalendarIntent()) {
-            actionLabel("calendar", "カレンダー", filled: false)
+            actionLabel("calendar", "カレンダー")
         }
         .buttonStyle(.plain)
     }
 
-    /// 「記録」は白地で目立たせ、「カレンダー」は半透明にして主従をつける
-    private func actionLabel(_ icon: String, _ title: String, filled: Bool) -> some View {
+    /// 半透明の白地に白い文字（グラデーション背景の上で読みやすい）
+    private func actionLabel(_ icon: String, _ title: String) -> some View {
         VStack(spacing: 2) {
             Image(systemName: icon).font(.title3)
             Text(title).font(.caption2.bold())
         }
-        .foregroundStyle(filled ? Theme.indigo : .white)
+        .foregroundStyle(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(filled ? Color.white : Color.white.opacity(0.22), in: .rect(cornerRadius: 12))
+        .background(Color.white.opacity(0.22), in: .rect(cornerRadius: 12))
     }
 }
