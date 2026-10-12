@@ -26,6 +26,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.atsuya.koe
         GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_NSMicrophoneUsageDescription: 声で日記を記録するためにマイクを使います
         INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: 録音した声を端末内で文字に起こすために使います
         INFOPLIST_KEY_NSHealthShareUsageDescription: 気分の記録と一緒に、睡眠・歩数・歩行距離を表示するために読み取ります（保存や送信はしません）

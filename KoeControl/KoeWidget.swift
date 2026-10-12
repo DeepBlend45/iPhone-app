@@ -63,7 +63,7 @@ struct KoeWidgetView: View {
     private var status: some View {
         VStack(alignment: .leading, spacing: 4) {
             Label("\(entry.streak)日連続", systemImage: "flame.fill")
-                .font(family == .systemMedium ? .title : .title3.bold())
+                .font(.system(family == .systemMedium ? .title : .title3, design: .rounded, weight: .heavy))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
                 .foregroundStyle(entry.streak > 0 ? .orange : .secondary)
