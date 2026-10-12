@@ -5,8 +5,8 @@ import AppIntents
 /// ホーム画面のウィジェット。「記録」と「カレンダー」をボタンで選べる
 struct KoeWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "com.atsuya.koe.Widget", provider: KoeProvider()) { _ in
-            KoeWidgetView()
+        StaticConfiguration(kind: "com.atsuya.koe.Widget", provider: KoeProvider()) { entry in
+            KoeWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Koe")
@@ -17,6 +17,15 @@ struct KoeWidget: Widget {
 
 struct KoeEntry: TimelineEntry {
     let date: Date
+    let streak: Int
+    let recordedToday: Bool
+
+    init(date: Date) {
+        self.date = date
+        let result = SharedStatus.streak(days: SharedStatus.loadDays(), now: date)
+        streak = result.count
+        recordedToday = result.recordedToday
+    }
 }
 
 struct KoeProvider: TimelineProvider {
@@ -25,22 +34,43 @@ struct KoeProvider: TimelineProvider {
         completion(KoeEntry(date: .now))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<KoeEntry>) -> Void) {
-        // 表示は変わらないので、明日0時に更新すれば足りる
-        let tomorrow = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
-        completion(Timeline(entries: [KoeEntry(date: .now)], policy: .after(tomorrow)))
+        // 日付が変わった瞬間に「今日は未記録」へ切り替えるため、明日0時の分も用意する
+        let midnight = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
+        let entries = [KoeEntry(date: .now), KoeEntry(date: midnight.addingTimeInterval(1))]
+        completion(Timeline(entries: entries, policy: .after(midnight.addingTimeInterval(60))))
     }
 }
 
 struct KoeWidgetView: View {
     @Environment(\.widgetFamily) private var family
+    let entry: KoeEntry
 
     var body: some View {
         switch family {
         case .systemMedium:
-            HStack(spacing: 12) { buttons }
+            HStack(spacing: 12) {
+                status
+                VStack(spacing: 8) { buttons }
+            }
         default:
-            VStack(spacing: 8) { buttons }
+            VStack(spacing: 8) {
+                status
+                HStack(spacing: 8) { buttons }
+            }
         }
+    }
+
+    private var status: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label("\(entry.streak)日連続", systemImage: "flame.fill")
+                .font(.headline)
+                .foregroundStyle(entry.streak > 0 ? .orange : .secondary)
+            Label(entry.recordedToday ? "今日は記録済み" : "今日はまだ",
+                  systemImage: entry.recordedToday ? "checkmark.circle.fill" : "circle")
+                .font(.caption.bold())
+                .foregroundStyle(entry.recordedToday ? .green : .secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
@@ -54,12 +84,12 @@ struct KoeWidgetView: View {
     }
 
     private func actionLabel(_ icon: String, _ title: String, _ color: Color) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: icon).font(.title2)
-            Text(title).font(.caption.bold())
+        VStack(spacing: 2) {
+            Image(systemName: icon).font(.title3)
+            Text(title).font(.caption2.bold())
         }
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(color.gradient, in: .rect(cornerRadius: 16))
+        .background(color.gradient, in: .rect(cornerRadius: 12))
     }
 }

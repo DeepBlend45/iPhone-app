@@ -1,6 +1,9 @@
 import SwiftUI
+import SwiftData
+import WidgetKit
 
 struct RootView: View {
+    @Query private var entries: [JournalEntry]
     @State private var showRecord = false
     @Bindable private var router = AppRouter.shared
 
@@ -21,11 +24,19 @@ struct RootView: View {
                 router.showRecord = false
             }
         }
+        .onChange(of: entries.count) { syncWidget() }
         .onAppear {
+            syncWidget()
             if router.showRecord {
                 showRecord = true
                 router.showRecord = false
             }
         }
+    }
+
+    /// ウィジェットに「記録した日」を渡して、表示を更新させる
+    private func syncWidget() {
+        SharedStatus.save(recordedDates: entries.map(\.createdAt))
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }

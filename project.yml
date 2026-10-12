@@ -21,6 +21,7 @@ targets:
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
+        com.apple.security.application-groups: [group.com.atsuya.koe]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.atsuya.koe
@@ -35,6 +36,10 @@ targets:
     type: app-extension
     platform: iOS
     sources: [KoeControl, Shared]
+    entitlements:
+      path: KoeControl/KoeControl.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.atsuya.koe]
     info:
       path: KoeControl/Info.plist
       properties:
