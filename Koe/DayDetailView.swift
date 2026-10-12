@@ -22,10 +22,11 @@ struct DayDetailView: View {
             Section("この日の運動量") {
                 HealthCard(health: health)
                     .padding(.vertical, 4)
+                    .themedRow()
             }
             Section("記録") {
                 if entries.isEmpty {
-                    Text("この日の記録はありません").foregroundStyle(.secondary)
+                    Text("この日の記録はありません").foregroundStyle(.secondary).themedRow()
                 }
                 ForEach(entries) { entry in
                     NavigationLink {
@@ -41,9 +42,12 @@ struct DayDetailView: View {
                             }
                         }
                     }
+                    .themedRow()
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .themedBackground()
         .navigationTitle(day.formatted(date: .abbreviated, time: .omitted))
         .navigationBarTitleDisplayMode(.inline)
         .task {

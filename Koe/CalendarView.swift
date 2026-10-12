@@ -42,6 +42,7 @@ struct CalendarView: View {
                 Spacer()
             }
             .padding()
+            .themedBackground()
             .navigationTitle("カレンダー")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -71,7 +72,7 @@ struct CalendarView: View {
             VStack(spacing: 2) {
                 Text("\(cal.component(.day, from: date))")
                     .font(.callout)
-                    .foregroundStyle(isToday ? Color.accentColor : .primary)
+                    .foregroundStyle(.white)
                     .fontWeight(isToday ? .bold : .regular)
                 if dayEntries.isEmpty {
                     Text(" ").font(.title3)
@@ -81,7 +82,7 @@ struct CalendarView: View {
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 48)
-            .background(isToday ? Color.accentColor.opacity(0.12) : .clear, in: .rect(cornerRadius: 8))
+            .background(Color.white.opacity(isToday ? 0.32 : 0.12), in: .rect(cornerRadius: 8))
         }
         .buttonStyle(.plain)
     }

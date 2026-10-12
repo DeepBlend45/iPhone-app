@@ -17,6 +17,7 @@ struct RecordView: View {
                 Spacer()
             }
             .padding()
+            .themedBackground()
             .navigationTitle("いまの気持ち")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -36,7 +37,7 @@ struct RecordView: View {
                     Text(moodEmojis[value - 1])
                         .font(.system(size: 36))
                         .padding(8)
-                        .background(mood == value ? Color.accentColor.opacity(0.25) : .clear, in: .circle)
+                        .background(Color.white.opacity(mood == value ? 0.35 : 0.12), in: .circle)
                 }
                 .buttonStyle(.plain)
             }
@@ -47,37 +48,40 @@ struct RecordView: View {
     private var content: some View {
         switch session.phase {
         case .idle:
-            bigButton("mic.fill", "話しはじめる", Theme.coral) { Task { await session.start() } }
+            bigButton("mic.fill", "話しはじめる") { Task { await session.start() } }
         case .recording:
-            bigButton("stop.fill", "止めて文字にする", Theme.indigo) { Task { await session.stop() } }
+            bigButton("stop.fill", "止めて文字にする") { Task { await session.stop() } }
         case .transcribing:
             ProgressView("文字に起こしています…")
         case .finished:
             VStack(spacing: 16) {
                 Text("あとで履歴から修正できます").font(.footnote).foregroundStyle(.secondary)
                 TextEditor(text: $session.transcript)
+                    .scrollContentBackground(.hidden)
                     .frame(minHeight: 160)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(.quaternary))
-                Button("保存", action: save).buttonStyle(.borderedProminent)
+                    .padding(8)
+                    .background(Color.white.opacity(0.18), in: .rect(cornerRadius: 12))
+                bigButton("checkmark", "保存", action: save)
             }
         case .failed(let message):
             VStack(spacing: 16) {
                 Text(message).foregroundStyle(.red)
                 if session.audioFileName != nil {
-                    Button("このまま保存", action: save).buttonStyle(.borderedProminent)
+                    bigButton("checkmark", "このまま保存", action: save)
                 }
             }
         }
     }
 
-    private func bigButton(_ icon: String, _ title: String, _ color: Color, action: @escaping () -> Void) -> some View {
+    private func bigButton(_ icon: String, _ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label(title, systemImage: icon)
                 .font(.title2.bold())
+                .foregroundStyle(.white)
                 .padding(.horizontal, 24).padding(.vertical, 16)
+                .background(Color.white.opacity(0.22), in: .rect(cornerRadius: 16))
         }
-        .buttonStyle(.borderedProminent)
-        .tint(color)
+        .buttonStyle(.plain)
     }
 
     private func save() {

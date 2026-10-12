@@ -29,6 +29,8 @@ struct HistoryView: View {
                         .onDelete(perform: delete)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .themedBackground()
             .overlay {
                 if entries.isEmpty {
                     ContentUnavailableView("まだ記録がありません", systemImage: "mic", description: Text("右上の＋から話してみましょう"))
@@ -55,6 +57,7 @@ struct HistoryView: View {
                 }
             }
         }
+        .themedRow()
     }
 
     private func delete(at offsets: IndexSet) {

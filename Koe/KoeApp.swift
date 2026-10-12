@@ -6,7 +6,8 @@ struct KoeApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .tint(Theme.coral)
+                .tint(.white)
+                .preferredColorScheme(.dark)
         }
         .modelContainer(for: JournalEntry.self)
     }

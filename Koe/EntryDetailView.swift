@@ -20,11 +20,16 @@ struct EntryDetailView: View {
                     }
                 }
             }
+            .themedRow()
             Section("文字起こし（聞きながら直せます）") {
                 TextEditor(text: $entry.transcript)
+                    .scrollContentBackground(.hidden)
                     .frame(minHeight: 240)
             }
+            .themedRow()
         }
+        .scrollContentBackground(.hidden)
+        .themedBackground()
         .navigationTitle("記録")
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { player?.stop() }
