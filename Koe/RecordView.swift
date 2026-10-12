@@ -8,6 +8,10 @@ struct RecordView: View {
     /// 記録する日。カレンダーの日付から開いたときは、その日付で保存する
     var day: Date = .now
 
+    @Query(sort: \PromptTemplate.createdAt) private var prompts: [PromptTemplate]
+    @State private var currentPrompt: String?
+    @State private var usePrompt = true
+
     @State private var session = RecordingSession()
     @State private var mood = 3
 
@@ -15,20 +19,67 @@ struct RecordView: View {
         NavigationStack {
             VStack(spacing: 24) {
                 moodPicker
+                promptCard
                 Spacer()
                 content
                 Spacer()
             }
             .padding()
             .themedBackground()
+            .onAppear(perform: shufflePrompt)
+            .onChange(of: prompts.count) { if currentPrompt == nil { shufflePrompt() } }
             .navigationTitle(isToday ? "いまの気持ち" : day.formatted(date: .abbreviated, time: .omitted) + "の記録")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("閉じる") { dismiss() }
                 }
+                ToolbarItem(placement: .primaryAction) {
+                    NavigationLink {
+                        PromptListView()
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("お題の設定")
+                }
             }
         }
+    }
+
+    /// 何を話すか迷ったときのお題。使わずに自由に話してもよい
+    @ViewBuilder
+    private var promptCard: some View {
+        if usePrompt {
+            VStack(spacing: 8) {
+                HStack {
+                    Label("お題", systemImage: "text.bubble").font(.caption.bold())
+                    Spacer()
+                    Button("お題を使わない", systemImage: "xmark") { usePrompt = false }
+                        .labelStyle(.iconOnly)
+                        .buttonStyle(.plain)
+                }
+                Text(currentPrompt ?? "お題がありません。右上の歯車から追加できます")
+                    .font(.title3.bold())
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                if session.phase == .idle {
+                    Button("別のお題", systemImage: "shuffle", action: shufflePrompt)
+                        .font(.footnote.bold())
+                        .buttonStyle(.plain)
+                }
+            }
+            .padding(12)
+            .background(Color.white.opacity(0.18), in: .rect(cornerRadius: 16))
+        } else {
+            Button("お題を表示", systemImage: "text.bubble") { usePrompt = true }
+                .font(.footnote)
+                .buttonStyle(.plain)
+        }
+    }
+
+    private func shufflePrompt() {
+        let candidates = prompts.map(\.text).filter { $0 != currentPrompt }
+        currentPrompt = candidates.randomElement() ?? prompts.first?.text
     }
 
     private var moodPicker: some View {
@@ -98,7 +149,8 @@ struct RecordView: View {
     }
 
     private func save() {
-        context.insert(JournalEntry(createdAt: createdAt, mood: mood, transcript: session.transcript, audioFileName: session.audioFileName))
+        context.insert(JournalEntry(createdAt: createdAt, mood: mood, transcript: session.transcript, audioFileName: session.audioFileName,
+                                    prompt: usePrompt ? currentPrompt : nil))
         dismiss()
     }
 }

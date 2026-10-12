@@ -10,12 +10,15 @@ final class JournalEntry {
     var transcript: String
     /// 原本の音声ファイル名（Documents/Audio 内）
     var audioFileName: String?
+    /// 記録のときに使ったお題（使わなかったら nil）
+    var prompt: String?
 
-    init(createdAt: Date = .now, mood: Int, transcript: String, audioFileName: String?) {
+    init(createdAt: Date = .now, mood: Int, transcript: String, audioFileName: String?, prompt: String? = nil) {
         self.createdAt = createdAt
         self.mood = mood
         self.transcript = transcript
         self.audioFileName = audioFileName
+        self.prompt = prompt
     }
 }
 

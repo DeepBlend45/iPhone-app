@@ -25,7 +25,7 @@ final class VisitRecord {
 enum Persistence {
     static let container: ModelContainer = {
         do {
-            return try ModelContainer(for: JournalEntry.self, VisitRecord.self)
+            return try ModelContainer(for: JournalEntry.self, VisitRecord.self, PromptTemplate.self)
         } catch {
             fatalError("データベースを開けませんでした: \(error)")
         }

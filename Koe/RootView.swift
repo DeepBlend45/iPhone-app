@@ -3,6 +3,7 @@ import SwiftData
 import WidgetKit
 
 struct RootView: View {
+    @Environment(\.modelContext) private var context
     @Query private var entries: [JournalEntry]
     @State private var showRecord = false
     @Bindable private var router = AppRouter.shared
@@ -26,6 +27,7 @@ struct RootView: View {
         }
         .onChange(of: entries.count) { syncWidget() }
         .onAppear {
+            PromptStore.seedIfNeeded(context)
             syncWidget()
             if router.showRecord {
                 showRecord = true

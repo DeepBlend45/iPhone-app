@@ -14,6 +14,9 @@ struct EntryDetailView: View {
                     Text(entry.createdAt.formatted(date: .complete, time: .shortened))
                         .font(.footnote).foregroundStyle(.secondary)
                 }
+                if let prompt = entry.prompt {
+                    Label(prompt, systemImage: "text.bubble").font(.subheadline.bold())
+                }
                 if entry.audioFileName != nil {
                     Button(isPlaying ? "停止" : "声を聞く", systemImage: isPlaying ? "stop.fill" : "play.fill") {
                         togglePlayback()
