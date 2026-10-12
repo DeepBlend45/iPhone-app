@@ -5,10 +5,11 @@ import Charts
 struct CalendarView: View {
     @Binding var showRecord: Bool
     @Query(sort: \JournalEntry.createdAt) private var entries: [JournalEntry]
-    @State private var month = Date.now
     @State private var selectedDay: Date?
-    @State private var gridFrame: CGRect = .zero
+    private let router = AppRouter.shared
     private let cal = Calendar.current
+
+    private var month: Date { router.month }
 
     private var entriesByDay: [Date: [JournalEntry]] {
         Dictionary(grouping: entries) { cal.startOfDay(for: $0.createdAt) }
@@ -38,14 +39,17 @@ struct CalendarView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     header
-                    grid
-                    MonthSummary(monthStart: monthStart, entriesByDay: entriesByDay)
-                    MoodChart(monthStart: monthStart, entriesByDay: entriesByDay)
+                    // 月のスワイプ中は、日付・サマリー・グラフが指に合わせて動く
+                    VStack(spacing: 16) {
+                        grid
+                        MonthSummary(monthStart: monthStart, entriesByDay: entriesByDay)
+                        MoodChart(monthStart: monthStart, entriesByDay: entriesByDay)
+                    }
+                    .offset(x: router.monthDrag)
+                    .opacity(1 - min(abs(router.monthDrag) / 500, 0.6))
                 }
                 .padding()
             }
-            .coordinateSpace(.named("page"))
-            .simultaneousGesture(swipeGesture)
             .themedBackground()
             .navigationTitle("カレンダー")
             .navigationBarTitleDisplayMode(.inline)
@@ -53,21 +57,8 @@ struct CalendarView: View {
                 Button("記録", systemImage: "plus") { showRecord = true }
             }
             .navigationDestination(item: $selectedDay) { DayDetailView(day: $0) }
+            .onChange(of: selectedDay) { router.calendarPushed = selectedDay != nil }
         }
-    }
-
-    /// 横スワイプ：カレンダーの上なら月の移動、それ以外ならタブの切り替え
-    private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 30, coordinateSpace: .named("page"))
-            .onEnded { value in
-                let dx = value.translation.width, dy = value.translation.height
-                guard abs(dx) > 60, abs(dx) > abs(dy) * 1.5 else { return }
-                if gridFrame.contains(value.startLocation) {
-                    shiftMonth(dx < 0 ? 1 : -1)
-                } else if dx < 0 {
-                    withAnimation { AppRouter.shared.selectedTab = .history }
-                }
-            }
     }
 
     private var grid: some View {
@@ -79,16 +70,16 @@ struct CalendarView: View {
                 if let date { dayCell(date) } else { Color.clear.frame(height: 48) }
             }
         }
-        .onGeometryChange(for: CGRect.self) { $0.frame(in: .named("page")) } action: { gridFrame = $0 }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { router.gridFrame = $0 }
     }
 
     private var header: some View {
         HStack {
-            Button("前の月", systemImage: "chevron.left") { shiftMonth(-1) }
+            Button("前の月", systemImage: "chevron.left") { router.shiftMonth(-1) }
             Spacer()
             Text(month.formatted(.dateTime.year().month())).font(.headline)
             Spacer()
-            Button("次の月", systemImage: "chevron.right") { shiftMonth(1) }
+            Button("次の月", systemImage: "chevron.right") { router.shiftMonth(1) }
         }
         .labelStyle(.iconOnly)
     }
@@ -115,12 +106,6 @@ struct CalendarView: View {
             .background(Color.white.opacity(isToday ? 0.32 : 0.12), in: .rect(cornerRadius: 8))
         }
         .buttonStyle(.plain)
-    }
-
-    private func shiftMonth(_ delta: Int) {
-        withAnimation {
-            month = cal.date(byAdding: .month, value: delta, to: month)!
-        }
     }
 }
 

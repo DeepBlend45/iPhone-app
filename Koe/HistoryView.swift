@@ -5,6 +5,7 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \JournalEntry.createdAt, order: .reverse) private var entries: [JournalEntry]
     @Binding var showRecord: Bool
+    @State private var path = NavigationPath()
 
     /// 過去の年の「同じ月日」の記録
     private var onThisDay: [JournalEntry] {
@@ -17,7 +18,7 @@ struct HistoryView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 if !onThisDay.isEmpty {
                     Section("過去の今日") {
@@ -31,15 +32,6 @@ struct HistoryView: View {
             }
             .scrollContentBackground(.hidden)
             .themedBackground()
-            // 右へスワイプでカレンダーのタブへ（行の削除は左スワイプなので重ならない）
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 30).onEnded { value in
-                    let dx = value.translation.width, dy = value.translation.height
-                    if dx > 60, dx > abs(dy) * 1.5 {
-                        withAnimation { AppRouter.shared.selectedTab = .calendar }
-                    }
-                }
-            )
             .overlay {
                 if entries.isEmpty {
                     ContentUnavailableView("まだ記録がありません", systemImage: "mic", description: Text("右上の＋から話してみましょう"))
@@ -49,13 +41,13 @@ struct HistoryView: View {
             .toolbar {
                 Button("記録", systemImage: "plus") { showRecord = true }
             }
+            .navigationDestination(for: JournalEntry.self) { EntryDetailView(entry: $0) }
+            .onChange(of: path.count) { AppRouter.shared.historyPushed = path.count > 0 }
         }
     }
 
     private func row(_ entry: JournalEntry) -> some View {
-        NavigationLink {
-            EntryDetailView(entry: entry)
-        } label: {
+        NavigationLink(value: entry) {
             HStack(alignment: .top) {
                 Text(moodEmojis[entry.mood - 1]).font(.title2)
                 VStack(alignment: .leading, spacing: 4) {
