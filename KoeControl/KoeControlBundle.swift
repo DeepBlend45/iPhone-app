@@ -6,6 +6,7 @@ import AppIntents
 struct KoeControlBundle: WidgetBundle {
     var body: some Widget {
         RecordControl()
+        KoeWidget()
     }
 }
 

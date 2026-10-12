@@ -2,14 +2,14 @@ import SwiftUI
 
 struct RootView: View {
     @State private var showRecord = false
-    private let router = AppRouter.shared
+    @Bindable private var router = AppRouter.shared
 
     var body: some View {
-        TabView {
-            Tab("履歴", systemImage: "list.bullet") {
+        TabView(selection: $router.selectedTab) {
+            Tab("履歴", systemImage: "list.bullet", value: KoeTab.history) {
                 HistoryView(showRecord: $showRecord)
             }
-            Tab("カレンダー", systemImage: "calendar") {
+            Tab("カレンダー", systemImage: "calendar", value: KoeTab.calendar) {
                 CalendarView(showRecord: $showRecord)
             }
         }
