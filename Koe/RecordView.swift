@@ -47,9 +47,9 @@ struct RecordView: View {
     private var content: some View {
         switch session.phase {
         case .idle:
-            bigButton("mic.fill", "話しはじめる", .red) { Task { await session.start() } }
+            bigButton("mic.fill", "話しはじめる", Theme.coral) { Task { await session.start() } }
         case .recording:
-            bigButton("stop.fill", "止めて文字にする", .gray) { Task { await session.stop() } }
+            bigButton("stop.fill", "止めて文字にする", Theme.indigo) { Task { await session.stop() } }
         case .transcribing:
             ProgressView("文字に起こしています…")
         case .finished:

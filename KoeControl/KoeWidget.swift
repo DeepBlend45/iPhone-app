@@ -7,7 +7,7 @@ struct KoeWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "com.atsuya.koe.Widget", provider: KoeProvider()) { entry in
             KoeWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(Theme.gradient, for: .widget)
         }
         .configurationDisplayName("Koe")
         .description("ワンタップで声の記録を始めたり、カレンダーを開いたりします")
@@ -66,13 +66,13 @@ struct KoeWidgetView: View {
                 .font(.system(family == .systemMedium ? .title : .title3, design: .rounded, weight: .heavy))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
-                .foregroundStyle(entry.streak > 0 ? .orange : .secondary)
+                .foregroundStyle(.white)
             Label(entry.recordedToday ? "今日は記録済み" : "今日はまだ",
                   systemImage: entry.recordedToday ? "checkmark.circle.fill" : "circle")
                 .font(family == .systemMedium ? .title3.bold() : .subheadline.bold())
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
-                .foregroundStyle(entry.recordedToday ? .green : .secondary)
+                .foregroundStyle(.white.opacity(entry.recordedToday ? 1 : 0.75))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -80,22 +80,23 @@ struct KoeWidgetView: View {
     @ViewBuilder
     private var buttons: some View {
         Button(intent: StartRecordingIntent()) {
-            actionLabel("mic.fill", "記録", .red)
+            actionLabel("mic.fill", "記録", filled: true)
         }
         .buttonStyle(.plain)
         Button(intent: OpenCalendarIntent()) {
-            actionLabel("calendar", "カレンダー", .blue)
+            actionLabel("calendar", "カレンダー", filled: false)
         }
         .buttonStyle(.plain)
     }
 
-    private func actionLabel(_ icon: String, _ title: String, _ color: Color) -> some View {
+    /// 「記録」は白地で目立たせ、「カレンダー」は半透明にして主従をつける
+    private func actionLabel(_ icon: String, _ title: String, filled: Bool) -> some View {
         VStack(spacing: 2) {
             Image(systemName: icon).font(.title3)
             Text(title).font(.caption2.bold())
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(filled ? Theme.indigo : .white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(color.gradient, in: .rect(cornerRadius: 12))
+        .background(filled ? Color.white : Color.white.opacity(0.22), in: .rect(cornerRadius: 12))
     }
 }

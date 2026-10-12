@@ -6,11 +6,11 @@ struct HealthCard: View {
 
     var body: some View {
         HStack {
-            item("bed.double.fill", .indigo, sleepText, "睡眠")
+            item("bed.double.fill", Theme.indigoText, sleepText, "睡眠")
             Divider()
-            item("figure.walk", .green, stepsText, "歩数")
+            item("figure.walk", Theme.coral, stepsText, "歩数")
             Divider()
-            item("point.topleft.down.to.point.bottomright.curvepath", .orange, distanceText, "歩行距離")
+            item("point.topleft.down.to.point.bottomright.curvepath", Theme.indigoText.opacity(0.7), distanceText, "歩行距離")
         }
         .frame(maxWidth: .infinity)
     }
