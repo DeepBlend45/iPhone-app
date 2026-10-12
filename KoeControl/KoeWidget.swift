@@ -63,11 +63,15 @@ struct KoeWidgetView: View {
     private var status: some View {
         VStack(alignment: .leading, spacing: 4) {
             Label("\(entry.streak)日連続", systemImage: "flame.fill")
-                .font(.headline)
+                .font(family == .systemMedium ? .title : .title3.bold())
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
                 .foregroundStyle(entry.streak > 0 ? .orange : .secondary)
             Label(entry.recordedToday ? "今日は記録済み" : "今日はまだ",
                   systemImage: entry.recordedToday ? "checkmark.circle.fill" : "circle")
-                .font(.caption.bold())
+                .font(family == .systemMedium ? .title3.bold() : .subheadline.bold())
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
                 .foregroundStyle(entry.recordedToday ? .green : .secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -78,9 +82,11 @@ struct KoeWidgetView: View {
         Button(intent: StartRecordingIntent()) {
             actionLabel("mic.fill", "記録", .red)
         }
+        .buttonStyle(.plain)
         Button(intent: OpenCalendarIntent()) {
             actionLabel("calendar", "カレンダー", .blue)
         }
+        .buttonStyle(.plain)
     }
 
     private func actionLabel(_ icon: String, _ title: String, _ color: Color) -> some View {
