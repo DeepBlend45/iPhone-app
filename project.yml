@@ -29,6 +29,9 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_NSMicrophoneUsageDescription: 声で日記を記録するためにマイクを使います
         INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: 録音した声を端末内で文字に起こすために使います
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: その日に撮った写真の撮影場所から、行った場所を表示するために読み取ります（写真は保存や送信をしません）
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: 行った場所を日記に残すために、位置情報を使います
+        INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: アプリを開いていないときも、滞在した場所を自動で日記に残すために、位置情報を使います（記録は端末内にだけ保存します）
         INFOPLIST_KEY_NSHealthShareUsageDescription: 気分の記録と一緒に、睡眠・歩数・歩行距離を表示するために読み取ります（保存や送信はしません）
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
