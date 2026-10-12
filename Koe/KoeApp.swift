@@ -5,7 +5,7 @@ import SwiftData
 struct KoeApp: App {
     var body: some Scene {
         WindowGroup {
-            HistoryView()
+            RootView()
         }
         .modelContainer(for: JournalEntry.self)
     }

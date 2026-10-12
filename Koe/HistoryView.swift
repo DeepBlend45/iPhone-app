@@ -4,8 +4,7 @@ import SwiftData
 struct HistoryView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \JournalEntry.createdAt, order: .reverse) private var entries: [JournalEntry]
-    @State private var showRecord = false
-    private let router = AppRouter.shared
+    @Binding var showRecord: Bool
 
     /// 過去の年の「同じ月日」の記録
     private var onThisDay: [JournalEntry] {
@@ -38,19 +37,6 @@ struct HistoryView: View {
             .navigationTitle("Koe")
             .toolbar {
                 Button("記録", systemImage: "plus") { showRecord = true }
-            }
-            .sheet(isPresented: $showRecord) { RecordView() }
-            .onChange(of: router.showRecord) { _, newValue in
-                if newValue {
-                    showRecord = true
-                    router.showRecord = false
-                }
-            }
-            .onAppear {
-                if router.showRecord {
-                    showRecord = true
-                    router.showRecord = false
-                }
             }
         }
     }

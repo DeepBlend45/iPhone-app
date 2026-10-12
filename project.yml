@@ -3,10 +3,12 @@ options:
   bundleIdPrefix: com.atsuya
   deploymentTarget:
     iOS: "26.0"
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    DEVELOPMENT_TEAM: ""   # Xcodeで自分のApple IDのTeamを選ぶ
 targets:
   Koe:
     type: application
@@ -14,12 +16,18 @@ targets:
     sources: [Koe, Shared]
     dependencies:
       - target: KoeControl
+    entitlements:
+      path: Koe/Koe.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.atsuya.koe
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_NSMicrophoneUsageDescription: 声で日記を記録するためにマイクを使います
         INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: 録音した声を端末内で文字に起こすために使います
+        INFOPLIST_KEY_NSHealthShareUsageDescription: 気分の記録と一緒に、睡眠・歩数・歩行距離を表示するために読み取ります（保存や送信はしません）
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
         TARGETED_DEVICE_FAMILY: "1"
@@ -37,3 +45,11 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.atsuya.koe.control
         TARGETED_DEVICE_FAMILY: "1"
+schemes:
+  Koe:
+    build:
+      targets:
+        Koe: all
+        KoeControl: all
+    run:
+      config: Debug

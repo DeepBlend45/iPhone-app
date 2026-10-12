@@ -1,0 +1,2 @@
+// 個人の設定（Team ID など）は Local.xcconfig に書く。Local.xcconfig は git 管理しない
+#include? "Local.xcconfig"
