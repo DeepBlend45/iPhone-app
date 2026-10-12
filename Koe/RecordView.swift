@@ -5,6 +5,9 @@ struct RecordView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
 
+    /// 記録する日。カレンダーの日付から開いたときは、その日付で保存する
+    var day: Date = .now
+
     @State private var session = RecordingSession()
     @State private var mood = 3
 
@@ -18,7 +21,7 @@ struct RecordView: View {
             }
             .padding()
             .themedBackground()
-            .navigationTitle("いまの気持ち")
+            .navigationTitle(isToday ? "いまの気持ち" : day.formatted(date: .abbreviated, time: .omitted) + "の記録")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -84,8 +87,18 @@ struct RecordView: View {
         .buttonStyle(.plain)
     }
 
+    private var isToday: Bool { Calendar.current.isDateInToday(day) }
+
+    /// 今日なら現在時刻、過去の日なら「その日の、いまと同じ時刻」にする
+    private var createdAt: Date {
+        guard !isToday else { return .now }
+        let cal = Calendar.current
+        let time = cal.dateComponents([.hour, .minute, .second], from: .now)
+        return cal.date(bySettingHour: time.hour ?? 12, minute: time.minute ?? 0, second: time.second ?? 0, of: day) ?? day
+    }
+
     private func save() {
-        context.insert(JournalEntry(mood: mood, transcript: session.transcript, audioFileName: session.audioFileName))
+        context.insert(JournalEntry(createdAt: createdAt, mood: mood, transcript: session.transcript, audioFileName: session.audioFileName))
         dismiss()
     }
 }

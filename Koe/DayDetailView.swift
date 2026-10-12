@@ -6,6 +6,10 @@ struct DayDetailView: View {
     let day: Date
     @Query private var entries: [JournalEntry]
     @State private var health: DayHealth?
+    @State private var showRecord = false
+
+    /// 未来の日には記録を追加できない
+    private var canAdd: Bool { Calendar.current.startOfDay(for: day) <= .now }
 
     init(day: Date) {
         self.day = day
@@ -50,6 +54,12 @@ struct DayDetailView: View {
         .themedBackground()
         .navigationTitle(day.formatted(date: .abbreviated, time: .omitted))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if canAdd {
+                Button("この日に記録", systemImage: "plus") { showRecord = true }
+            }
+        }
+        .sheet(isPresented: $showRecord) { RecordView(day: day) }
         .task {
             await HealthService.shared.requestAuthorization()
             health = await HealthService.shared.summary(for: day)
