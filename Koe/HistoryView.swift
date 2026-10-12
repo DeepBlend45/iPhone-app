@@ -31,6 +31,15 @@ struct HistoryView: View {
             }
             .scrollContentBackground(.hidden)
             .themedBackground()
+            // 右へスワイプでカレンダーのタブへ（行の削除は左スワイプなので重ならない）
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 30).onEnded { value in
+                    let dx = value.translation.width, dy = value.translation.height
+                    if dx > 60, dx > abs(dy) * 1.5 {
+                        withAnimation { AppRouter.shared.selectedTab = .calendar }
+                    }
+                }
+            )
             .overlay {
                 if entries.isEmpty {
                     ContentUnavailableView("まだ記録がありません", systemImage: "mic", description: Text("右上の＋から話してみましょう"))

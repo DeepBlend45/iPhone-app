@@ -34,4 +34,20 @@ enum SharedStatus {
         }
         return (count, recordedToday)
     }
+
+    /// 最長の連続日数
+    static func longestStreak(days: Set<Date>) -> Int {
+        let cal = Calendar.current
+        var best = 0
+        for start in days where !days.contains(cal.date(byAdding: .day, value: -1, to: start)!) {
+            var length = 1
+            var cursor = start
+            while let next = cal.date(byAdding: .day, value: 1, to: cursor), days.contains(next) {
+                length += 1
+                cursor = next
+            }
+            best = max(best, length)
+        }
+        return best
+    }
 }
