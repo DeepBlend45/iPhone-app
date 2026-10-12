@@ -13,6 +13,8 @@ struct DayDetailView: View {
     private let monitor = VisitMonitor.shared
     @State private var health: DayHealth?
     @State private var showRecord = false
+    /// 場所の欄の開閉。ユーザーが操作するまでは、項目が多いときだけ閉じておく
+    @State private var placesExpandedByUser: Bool?
 
     /// 未来の日には記録を追加できない
     private var canAdd: Bool { Calendar.current.startOfDay(for: day) <= .now }
@@ -34,12 +36,6 @@ struct DayDetailView: View {
 
     var body: some View {
         List {
-            Section("この日の運動量") {
-                HealthCard(health: health)
-                    .padding(.vertical, 4)
-                    .themedRow()
-            }
-            placesSection
             Section("記録") {
                 if entries.isEmpty {
                     Text("この日の記録はありません").foregroundStyle(.secondary).themedRow()
@@ -61,6 +57,12 @@ struct DayDetailView: View {
                     .themedRow()
                 }
             }
+            Section("この日の運動量") {
+                HealthCard(health: health)
+                    .padding(.vertical, 4)
+                    .themedRow()
+            }
+            placesSection
         }
         .scrollContentBackground(.hidden)
         .themedBackground()
@@ -81,36 +83,56 @@ struct DayDetailView: View {
 
     // MARK: - 場所
 
+    private var placeCount: Int { visits.count + photoPlaces.count }
+    private var placesExpanded: Bool { placesExpandedByUser ?? (placeCount <= 2) }
+
     @ViewBuilder
     private var placesSection: some View {
-        Section("この日の場所") {
-            if visits.isEmpty && photoPlaces.isEmpty {
-                Text("この日の場所の記録はありません").foregroundStyle(.secondary).themedRow()
-            }
-            ForEach(visits) { visit in
-                placeRow("mappin.circle.fill", visit.placeName ?? "場所を取得中…", visitTime(visit))
-            }
-            ForEach(photoPlaces) { place in
-                placeRow("photo.fill", place.name, "写真\(place.count)枚 ・ " + place.first.formatted(date: .omitted, time: .shortened))
-            }
-            if photoStatus == .notDetermined {
-                Button("写真の撮影場所を読み込む", systemImage: "photo") {
-                    Task {
-                        photoStatus = await PhotoPlaceService.requestAccess()
-                        await loadPlaces()
+        Section {
+            if placesExpanded {
+                if placeCount == 0 {
+                    Text("この日の場所の記録はありません").foregroundStyle(.secondary).themedRow()
+                }
+                ForEach(visits) { visit in
+                    placeRow("mappin.circle.fill", visit.placeName ?? "場所を取得中…", visitTime(visit))
+                }
+                ForEach(photoPlaces) { place in
+                    placeRow("photo.fill", place.name, "写真\(place.count)枚 ・ " + place.first.formatted(date: .omitted, time: .shortened))
+                }
+                if photoStatus == .notDetermined {
+                    Button("写真の撮影場所を読み込む", systemImage: "photo") {
+                        Task {
+                            photoStatus = await PhotoPlaceService.requestAccess()
+                            await loadPlaces()
+                        }
                     }
+                    .themedRow()
+                } else if photoStatus == .denied || photoStatus == .restricted {
+                    Text("写真へのアクセスが許可されていません（設定アプリで変更できます）")
+                        .font(.footnote).foregroundStyle(.secondary).themedRow()
                 }
-                .themedRow()
-            } else if photoStatus == .denied || photoStatus == .restricted {
-                Text("写真へのアクセスが許可されていません（設定アプリで変更できます）")
-                    .font(.footnote).foregroundStyle(.secondary).themedRow()
-            }
-            if monitor.status != .authorizedAlways {
-                Button("滞在した場所の自動記録を始める", systemImage: "location.fill") {
-                    monitor.requestAuthorization()
+                if monitor.status != .authorizedAlways {
+                    Button("滞在した場所の自動記録を始める", systemImage: "location.fill") {
+                        monitor.requestAuthorization()
+                    }
+                    .themedRow()
                 }
-                .themedRow()
             }
+        } header: {
+            Button {
+                withAnimation { placesExpandedByUser = !placesExpanded }
+            } label: {
+                HStack {
+                    Text("この日の場所")
+                    if placeCount > 0 { Text("\(placeCount)か所").foregroundStyle(.secondary) }
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .rotationEffect(.degrees(placesExpanded ? 0 : -90))
+                }
+                .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .textCase(nil)
         }
     }
 
